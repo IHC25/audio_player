@@ -1,27 +1,37 @@
 package com.imran.audioplayer;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-    ImageView playImg1, playImg2, playImg3;
+public class MainActivity extends AppCompatActivity {
     MediaPlayer mediaPlayer;
+    ListView songList;
     private int pausedPosition = 0;
+
+    ArrayList< HashMap<String,String> > songsCollection = new ArrayList<>();
+    HashMap<String,String> hashMap = new HashMap<>();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -29,37 +39,38 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        //Assign Variables
-        playImg1 = findViewById(R.id.playImg1);
-        playImg2 = findViewById(R.id.playImg2);
-        playImg3 = findViewById(R.id.playImg3);
 
-        // Set initial tags to avoid null issues
-        playImg1.setTag("FINISHED");
-        playImg2.setTag("FINISHED");
-        playImg3.setTag("FINISHED");
+        songList = findViewById(R.id.songList);
 
-        //Set OnClick Listener
-        playImg1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleAudioPlayer(playImg1, new ImageView[]{playImg2,playImg3}, R.raw.onno_groher_chad);
-            }
-        });
+        hashMap = new HashMap<>();
+        hashMap.put("songName","Onno Groher Chad");
+        hashMap.put("songDetails","Onno Groher Chand | অন্য গ্রহের চাঁদ Artist - Sohan Ali Cover - Tahsin Ariyan #onnogroherchand #tahsinariyan #cover.");
+        hashMap.put("songCover","@drawable/onno_groher_chad_img");
+        hashMap.put("songAudio","@raw/onno_groher_chad");
 
-        playImg2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleAudioPlayer(playImg2, new ImageView[]{playImg1,playImg3}, R.raw.amarsonarbangla_james);
-            }
-        });
+        songsCollection.add(hashMap);
 
-        playImg3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleAudioPlayer(playImg3, new ImageView[]{playImg1,playImg2}, R.raw.ami_shunechi_shedin);
-            }
-        });
+        hashMap = new HashMap<>();
+        hashMap.put("songName","Amar sonar Bangla");
+        hashMap.put("songDetails","Amar sonar bangla James ♪ আমার সোনার বাংলা by জেমস James আমার সোনার বাংলা #james");
+        hashMap.put("songCover","@drawable/sonar_bangla_james");
+        hashMap.put("songAudio","@raw/amarsonarbangla_james");
+
+        songsCollection.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName","Ami Shunechi Shedin");
+        hashMap.put("songDetails","আমি শুনেছি সেদিন তুমি - মৌসুমী ভৌমিক. Ami Sunechi Shedin Tumi - Moushumi Bhowmik. আমি শুনেছি সেদিন তুমি সাগরের ঢেউয়ে চেপে নীলজল দিগন্ত ছুঁয়ে এসেছো আমি শুনেছি সেদিন");
+        hashMap.put("songCover","@drawable/ami_shunechi_cover");
+        hashMap.put("songAudio","@raw/ami_shunechi_shedin");
+
+        songsCollection.add(hashMap);
+
+
+        MyAdapter myAdapter = new MyAdapter();
+        songList.setAdapter(myAdapter);
+
+
     }
 
 
@@ -67,8 +78,10 @@ public class MainActivity extends AppCompatActivity {
     //-------------------------------------Handling Audio Player-----------------------------------------//
     //--------------------------------------------------------------------------------------------------//
 
-    private void handleAudioPlayer(ImageView playImg, ImageView[] otherPlayImgs, int audioResource) {
+    private void handleAudioPlayer(ImageView playImg, int audioResource) {
         String currentTag = (String) playImg.getTag(); // Ensure it's cast to String to avoid class cast exceptions
+
+
 
         // Use switch to handle different states (PAUSED, PLAY, FINISHED)
         switch (currentTag) {
@@ -87,11 +100,6 @@ public class MainActivity extends AppCompatActivity {
                 playImg.setTag("PLAY");
                 playImg.setImageResource(R.drawable.pause_icon);
 
-                // Reset all other play buttons (other songs) to the FINISHED state
-                for (ImageView otherPlayImg : otherPlayImgs) {
-                    otherPlayImg.setTag("FINISHED");
-                    otherPlayImg.setImageResource(R.drawable.play_icon);
-                }
                 break;
 
             case "PLAY":
@@ -115,11 +123,6 @@ public class MainActivity extends AppCompatActivity {
                 playImg.setTag("PLAY");
                 playImg.setImageResource(R.drawable.pause_icon);
 
-                // Reset all other play buttons to FINISHED state
-                for (ImageView otherPlayImg : otherPlayImgs) {
-                    otherPlayImg.setTag("FINISHED");
-                    otherPlayImg.setImageResource(R.drawable.play_icon);
-                }
 
                 // Handle when the song finishes playing
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -132,6 +135,71 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+        }
+    }
+    //===============================================================================================//
+    private class MyAdapter extends BaseAdapter {
+
+        LayoutInflater layoutInflator;
+
+        @Override
+        public int getCount() {
+            return songsCollection.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View view, ViewGroup viewGroup) {
+
+            layoutInflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View myView = layoutInflator.inflate(R.layout.item,viewGroup,false);
+
+            //Assign Variables
+            ImageView songConverImg = myView.findViewById(R.id.songConverImg);
+            TextView songName = myView.findViewById(R.id.songName);
+            TextView songDetails = myView.findViewById(R.id.songDetails);
+            ImageView playImg = myView.findViewById(R.id.playImg);
+
+            HashMap<String,String> hashMap = songsCollection.get(position);
+            songName.setText(hashMap.get("songName"));
+            songDetails.setText(hashMap.get("songDetails"));
+            playImg.setTag("FINISHED");
+
+            String songCover = hashMap.get("songCover");
+            int resourceId = getResources().getIdentifier(songCover.substring(1), "drawable", getPackageName());
+            songConverImg.setImageResource(resourceId);
+
+            String songAudio = hashMap.get("songAudio");
+            int audioResourceId = getResources().getIdentifier(songAudio.substring(1), "raw", getPackageName());
+
+
+            playImg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    handleAudioPlayer(playImg,audioResourceId);
+                    // Change other PlayImg resouce to playicon
+                    for (int i = 0; i < songList.getChildCount(); i++) {
+                        View otherView = songList.getChildAt(i);
+                        ImageView otherPlayImg = otherView.findViewById(R.id.playImg);
+                        if (otherPlayImg != playImg) {
+                            otherPlayImg.setImageResource(R.drawable.play_icon);
+                            otherPlayImg.setTag("FINISHED");
+                        }
+                    }
+                }
+            });
+
+
+            return myView;
         }
     }
 
